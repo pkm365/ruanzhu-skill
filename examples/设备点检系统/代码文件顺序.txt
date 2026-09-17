@@ -1,0 +1,23 @@
+# build_code_docx.py 的输入格式：一行一个相对项目根目录的路径，按抽取顺序排列。
+# 第 1 个必须是程序入口；最后一个文件的结尾就是第 60 页的结尾，必须是完整模块收尾。
+# 以下路径为示例，请替换成自己项目的真实文件。
+src/main/java/com/example/inspection/InspectionApplication.java
+src/main/java/com/example/inspection/config/WebConfig.java
+src/main/java/com/example/inspection/controller/AuthController.java
+src/main/java/com/example/inspection/controller/DeviceController.java
+src/main/java/com/example/inspection/service/DeviceService.java
+src/main/java/com/example/inspection/controller/StandardController.java
+src/main/java/com/example/inspection/service/StandardService.java
+src/main/java/com/example/inspection/service/TaskGenerateService.java
+src/main/java/com/example/inspection/controller/TaskController.java
+src/main/java/com/example/inspection/service/TaskService.java
+src/main/java/com/example/inspection/service/ExceptionFlowService.java
+src/main/java/com/example/inspection/service/StatisticsService.java
+web/src/main.js
+web/src/router/index.js
+web/src/views/Login.vue
+web/src/views/Device/DeviceList.vue
+web/src/views/Standard/StandardEdit.vue
+web/src/views/Task/TaskExecute.vue
+web/src/views/Exception/ExceptionList.vue
+web/src/views/Statistics/Statistics.vue
