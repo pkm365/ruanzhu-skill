@@ -87,7 +87,7 @@ uv run --with python-docx python3 <skill>/scripts/collect_sources.py <项目根>
 S=<skill>/scripts
 uv run --with python-docx --with pyyaml python3 $S/fill_application_form.py 草稿/申请表信息.yaml -o 正式资料/
 uv run --with python-docx python3 $S/build_manual_docx.py 草稿/操作手册.md --name "<全称>" --version V1.0 --owner "<权利人>" -o 正式资料/
-uv run --with python-docx python3 $S/build_code_docx.py --root <项目根> --files 草稿/代码文件顺序.txt --name "<全称>" --version V1.0 -o 正式资料/
+uv run --with python-docx python3 $S/build_code_docx.py --root <项目根> --files 草稿/代码文件顺序.txt --name "<全称>" --version V1.0 -o 正式资料/ [--strip-vue-style]
 ```
 `--name/--version/--owner` 必须直接取自 yaml，不要手敲。看 `build_code_docx.py` 打印的首页起始/末页结束，确认是入口和完整收尾；否则调整顺序重跑。
 
@@ -107,7 +107,7 @@ uv run --with python-docx --with pyyaml python3 $S/check_consistency.py 正式�
 | 脚本 | 作用 |
 |---|---|
 | `collect_sources.py` | 扫描项目，输出候选文件表 + 真实源程序量 + 语言汇总 |
-| `build_code_docx.py` | 有序文件清单 → 50 行/页、前30后30、页眉页码、末页标注的代码 Word + 页索引 |
+| `build_code_docx.py` | 有序文件清单 → 50 行/页、前30后30、页眉页码、末页标注的代码 Word + 页索引；`--strip-vue-style` 去掉 .vue 样式块，避免核心页被 CSS 占满 |
 | `build_manual_docx.py` | 手册 Markdown → 封面/目录/页眉页码/插图图注的 Word |
 | `fill_application_form.py` | yaml → 填公司申请表模版 docx + 申请表信息.txt，含字数校验 |
 | `check_consistency.py` | 三份材料一致性与硬指标自检 |

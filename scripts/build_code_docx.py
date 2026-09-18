@@ -11,6 +11,7 @@
 
 规则（内置，见 references/格式要求.md）:
   - 去空行、去纯注释行（--keep-comments 可保留注释）；Tab 转 4 空格
+  - --strip-vue-style 去掉 .vue 的 <style> 块，避免前/后 30 页被大段 CSS 占满
   - 每页严格 50 行，每页前强制分页；页眉左"全称+版本号"，右"第 N 页"
   - 总页 > 60：连续前 30 页 + 连续后 30 页，页码 1–60；≤ 60 页：全部
   - 末页不足 50 行：页底标注"本页为源代码最后一页，共 XX 行"
@@ -30,13 +31,18 @@ FRONT_PAGES = 30
 BACK_PAGES = 30
 BLOCK_COMMENT = {"/*": "*/", "<!--": "-->", '"""': '"""', "'''": "'''"}
 
-def clean_lines(text: str, keep_comments: bool):
+def clean_lines(text: str, keep_comments: bool, strip_vue_style: bool = False):
     """返回 [(原始行号, 文本)]"""
-    out = []; in_block = None
+    out = []; in_block = None; in_style = False
     for i, raw in enumerate(text.splitlines(), 1):
         line = raw.replace("\t", "    ").rstrip()
         s = line.strip()
         if not s: continue
+        if strip_vue_style:
+            if s.startswith("<style"): in_style = True
+            if in_style:
+                if s.startswith("</style>"): in_style = False
+                continue
         if not keep_comments:
             if in_block:
                 if in_block in s: in_block = None
@@ -59,6 +65,7 @@ def main():
     ap.add_argument("--version", required=True, help="版本号，如 V1.0")
     ap.add_argument("-o", "--outdir", default=".")
     ap.add_argument("--keep-comments", action="store_true")
+    ap.add_argument("--strip-vue-style", action="store_true", help="去掉 .vue 文件中的 <style> 块（样式不作为核心代码页）")
     ap.add_argument("--font", default="宋体")
     ap.add_argument("--font-size", type=float, default=9)
     a = ap.parse_args()
@@ -75,7 +82,8 @@ def main():
         p = root / rel
         if not p.exists():
             sys.exit(f"文件不存在: {p}")
-        lines = clean_lines(p.read_text(encoding="utf-8", errors="replace"), a.keep_comments)
+        lines = clean_lines(p.read_text(encoding="utf-8", errors="replace"), a.keep_comments,
+                            a.strip_vue_style and p.suffix.lower() == ".vue")
         per_file.append((rel, len(lines)))
         all_lines.extend((rel, n, t) for n, t in lines)
     total = len(all_lines)
