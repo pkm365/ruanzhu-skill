@@ -76,15 +76,25 @@ def main():
         h1 = [p.text.strip() for p in m.paragraphs if p.style.name == "Heading 1"]
         imgs = m.element.body.xml.count("<pic:pic")
         body_chars = sum(len(p) for p in paras)
-        est_pages = body_chars / 900 + imgs * 0.45
-        I(f"手册: 一级标题 {len(h1)} 个，插图 {imgs} 张，正文约 {body_chars} 字，估算 {est_pages:.0f} 页（含图，不含封面目录）")
-        if est_pages < 20: P(f"手册估算仅 {est_pages:.0f} 页，要求除目录外 ≥20 页")
+        pdf = manual.with_suffix(".pdf")
+        if pdf.exists():
+            try:
+                from pypdf import PdfReader
+                real = len(PdfReader(str(pdf)).pages) - 2  # 去封面、目录
+                I(f"手册: 一级标题 {len(h1)} 个，插图 {imgs} 张，正文约 {body_chars} 字，PDF 实际 {real} 页（不含封面目录）")
+                if real < 20: P(f"手册 PDF 仅 {real} 页，要求除目录外 ≥20 页")
+            except ImportError:
+                I("装 pypdf 可按 PDF 真实页数校验：uv run --with pypdf ...")
+        else:
+            est_pages = body_chars / 900 + imgs * 0.45
+            I(f"手册: 一级标题 {len(h1)} 个，插图 {imgs} 张，正文约 {body_chars} 字，估算 {est_pages:.0f} 页（含图，不含封面目录；转 PDF 后按真实页数校验）")
+            if est_pages < 20: P(f"手册估算仅 {est_pages:.0f} 页，要求除目录外 ≥20 页")
         if imgs == 0: P("手册没有任何截图")
         func = data.get("软件的主要功能", "")
         for title in h1:
             core = re.sub(r"^[\d.、\s一二三四五六七八九十]+", "", title)
             core = re.sub(r"(系统|模块|管理|功能|设置)$", "", core) or core
-            if core and core not in func: I(f"手册章节「{title}」在申请表主要功能里未出现，确认是否需要对应")
+            if core and core.replace(" ", "") not in func.replace(" ", ""): I(f"手册章节「{title}」在申请表主要功能里未出现，确认是否需要对应")
         for bad in ("import ", "public class", "function(", "SELECT ", "def "):
             if any(bad in p for p in paras): P(f"手册疑似含代码片段「{bad.strip()}」，说明书禁止出现功能函数代码"); break
 

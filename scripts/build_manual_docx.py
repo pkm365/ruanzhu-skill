@@ -35,10 +35,12 @@ IMG_RE = re.compile(r"^!\[(?P<cap>[^\]]*)\]\((?P<src>[^)]+)\)\s*$")
 PLACEHOLDER_RE = re.compile(r"^【截图预留[:：].*】\s*$")
 HEAD_RE = re.compile(r"^(#{1,3})\s+(.*)$")
 
+LINE_SPACING = 1.3  # 12pt × 1.3 ≈ 每页 40 行，满足"每页文字 ≥30 行"
+
 def body_para(doc, text, font, size=12, indent=True, align=None):
     p = doc.add_paragraph()
     pf = p.paragraph_format
-    pf.line_spacing_rule = WD_LINE_SPACING.MULTIPLE; pf.line_spacing = 1.5
+    pf.line_spacing_rule = WD_LINE_SPACING.MULTIPLE; pf.line_spacing = LINE_SPACING
     pf.space_before = Pt(0); pf.space_after = Pt(0)
     if indent: pf.first_line_indent = Pt(size * 2)
     if align is not None: p.alignment = align
@@ -104,6 +106,7 @@ def main():
     ap.add_argument("-o", "--outdir", default=".")
     ap.add_argument("--font", default="宋体")
     ap.add_argument("--static-toc", action="store_true")
+    ap.add_argument("--line-spacing", type=float, default=None, help="正文行距倍数，默认 1.3")
     ap.add_argument("--img-root", default=None, help="图片相对路径的基准目录，默认为 markdown 所在目录")
     a = ap.parse_args()
 
@@ -114,6 +117,8 @@ def main():
         try: lines = lines[lines.index("---", 1) + 1:]
         except ValueError: pass
 
+    global LINE_SPACING
+    if a.line_spacing: LINE_SPACING = a.line_spacing
     font = a.font
     doc = Document()
     set_style_font(doc.styles["Normal"], font, 12)
